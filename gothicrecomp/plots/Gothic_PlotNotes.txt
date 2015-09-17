@@ -1,0 +1,28 @@
+Notes on plot names
+31.March.2011
+---------------------------
+---------------------------
+gothiccleanplots.R does the work to pre-clean the plots
+I then ran the output and decisions I made by George Aldridge (Inouye postdoc) 
+
+---------------------------
+Updated 9.Sept.2015: To change:
+wm: willow-meadow 
+mi: interface plots
+to now all be part of interface plots
+Also changed gothiccleanplots.R to fix the cause of the problem and lookupplotcorr.csv, updated the metadata file and recompiled the data to incorporate this change.
+---------------------------
+
+Plot naming:
+rm: rocky meadow
+gh: greenhouse
+vr: veratrum removal
+wm: wet meadow
+em: erthronium meados
+mw: meadow (alone) plots
+st stream plots
+mi: interface plots and willow-meadow interface plots
+
+Other changes:
+numbers 10 and 11 -- to 1 (st1 and st10 are the same plot)
+1973 plots were left unchanged on purpose (first year, naming conventions and plots in flux)

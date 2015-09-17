@@ -1,0 +1,792 @@
+load("/Volumes/lizzie/installed_old.rda")
+tmp <- installed.packages()#
+installedpkgs.new <- as.vector(tmp[is.na(tmp[,"Priority"]), 1])#
+missing <- setdiff(installedpkgs, installedpkgs.new)#
+install.packages(missing)#
+update.packages()
+library(tools)#
+library(xtable)#
+options(SweaveSyntax="SweaveSyntaxNoweb")
+try <- read.csv("~/Documents/Subversion/phenology/gothic/species/cleanedspp.csv", header=TRUE)
+try <- read.csv("~/Documents/Subversion/phenology/gothic/gothicclean.csv", header=TRUE)
+try <- read.csv("~/Documents/Subversion/phenology/gothic/species/gothicclean.csv", header=TRUE)
+header(try)
+head(try)
+names(try)
+unique(try$unknown1)
+unique(try$unknown2)
+unique(try$notes)
+goo <- read.csv("~/Documents/Subversion/phenology/gothic/species/gothicclean.csv", header=TRUE)
+head(goo)
+unique(goo$plots)
+mi <- subset(goo, plots=="mi")
+head(mi)
+tail(mi)
+tolower("FRONTIERS IN ECOLOGY AND THE ENVIRONMENT")
+# RANDOM SLOPE AND INTERCEPT MODEL ##
+# Create the species-level parameters#
+J <- 30 # number of species #
+#level <- 120 # mean phenovalue and SE is 39#
+a <- rnorm(J, 120, 41) #species error, intercept#
+#trend <- rep(-0.3,J) # mean slope?; range is -1.75 to 1.21 chosen range based on slopes from synchrony_notype_hk#
+#sigma_trend <- rep(0.005,J)  # variance around slope? range is 0.0019-0.0096 chosen range from SE around slope from synchrony_notype_hk#
+b <- rnorm(J, -0.32, 0.499) #n=87 species#
+year_0 <- 1981 #nohinge#
+sigma_y<- 5 #??#
+#
+# Create the data#
+n_data_per_species <- round(runif(J, 5, 37)) #how many years per spp#
+species <- rep(1:J, n_data_per_species) #nrow of dataframe#
+N <- length(species)#
+year <- rep(NA, N)#
+for (j in 1:J){#
+  year[species==j] <- rev(2013 - 1:(n_data_per_species[j]))-year_0 #from first year of study, number of years that differ from 1976, rev:like sort in descending order-HK added, series of years for each spp#
+}
+year
+for (j in 1:J){#
+  w<-year[species==j]<=0 # or 1981#
+  x<-which(w==FALSE)#
+  k<-length(w)-length(x)#
+  if (k>=5){#
+  	d<-year[species==j]#
+  	d[1:k]<-0 # or 1981#
+  	year[species==j]<-d#
+  }#
+  }
+year
+ypred <- length(N) # Lizzie added#
+for (n in 1:N){ #actual STAN model#
+  s <- species[n] #sppid for each row#
+  ypred[n] <- a[s] + b[s]*year[n]#
+   }#
+y <- rnorm(N, ypred, sigma_y);
+y
+colors=c("blue", "red")#
+par(mar=c(3,3,1,1), mgp=c(1.5,.5,0), tck=-.01)#
+plot(x=year, y=y, type="n", xlab="Year", ylab="Day of year", bty="l", main="Raw data", xlim=c(-5,31), ylim=c(39,209));#
+for (j in 1:J)#
+  lines(year[species==j], y[species==j])
+goo <- read.csv("~/Documents/Subversion/phenology/gothic/species/gothicclean.csv", header=TRUE)
+wm1 <- subset(goo, plots="wm1")
+head(wm1)
+wm1 <- subset(goo, plotNums="wm-1" & year==2009)
+head(wm1)
+wim1
+wm1
+subset(wm1, species=="Lupinus sp.")
+wm1 <- subset(goo, plotNums=="wm-1" & year==2009)
+wm1 <- subset(goo, plotNums=="wm-1" & year=="2009")
+head(goo)
+wm1 <- subset(goo, plotNums=="wm-1")
+head(wm1)
+subset(wm1, species=="Lupinus sp.")
+head(wm1)
+wm1$year <- as.Date(wm1$date, "%y")
+head(wm1)
+wm1$date <- as.Date(wm1$date, "%Y-%m-%d")
+head(wm1)
+wm1$Date <- as.Date(wm1$date, "%Y-%m-%d")
+head(wm1)
+wm1$year <- format(wm1$date, "%Y")
+head(wm1)
+wm2009 <- subset(wm1, year=="2009")
+subset(wm2009, species =="Lupinus sp.")
+b <- rnorm(J, -0.32, 0.499)
+# RANDOM SLOPE AND INTERCEPT MODEL ##
+# Create the species-level parameters#
+J <- 30 # number of species #
+#level <- 120 # mean phenovalue and SE is 39#
+a <- rnorm(J, 120, 41) #species error, intercept#
+#trend <- rep(-0.3,J) # mean slope?; range is -1.75 to 1.21 chosen range based on slopes from synchrony_notype_hk#
+#sigma_trend <- rep(0.005,J)  # variance around slope? range is 0.0019-0.0096 chosen range from SE around slope from synchrony_notype_hk#
+b <- rnorm(J, -0.32, 0.499) #n=87 species#
+year_0 <- 1981 #nohinge#
+sigma_y<- 5 #??
+b
+hist(b)
+goo <- read.csv("~/Documents/Subversion/phenology/gothic/species/gothicclean.csv", header=TRUE)
+head(goo)
+tryhere <- which(grepl("int", goo$file)==TRUE)
+try <- goo[tryhere,]
+head(try)
+options(stringsAsFactors = FALSE)#
+#
+gothic <- read.csv("/Users/Lizzie/Documents/Professional/NCEAS/Research/Phenology/Data/Gothic/Compiling data/October2010Progress/gothic-testclean/gothic-cleaned.csv", header=TRUE)#
+#
+gothic$filelow <- tolower(gothic$file)#
+sites <- unique(gothic$filelow)
+## Clean up plots ###
+#
+# interface plots ##
+interface <- which(grepl("int", sites)==TRUE)#
+#sites[interface]#
+# rocky meadow plots (incl. aspen forest) ##
+rmplots <- which(grepl("rm", sites)==TRUE)#
+# sites[rmplots]#
+rmplots1 <- which(grepl("rocky meadow", sites)==TRUE)#
+rmplots2 <- which(grepl("aspen forest", sites)==TRUE)#
+# wet meadow plots ##
+wmplots <- which(grepl("wm", sites)==TRUE)#
+# sites[wmplots]#
+wmplots1 <- which(grepl("wet meadow", sites)==TRUE)#
+wmplots2 <- which(grepl("w-m", sites)==TRUE)#
+# erythronium meadow plots ##
+emplots <- which(grepl("em", sites)==TRUE)#
+# sites[emplots]#
+emplots <- emplots[1:40]#
+emplots1 <- which(grepl("erythronium meadow", sites)==TRUE)#
+# greenhouse plots ##
+gpplots <- which(grepl("gp", sites)==TRUE)#
+# sites[gpplots]#
+gpplots1 <- which(grepl("greenhouse", sites)==TRUE)#
+# veratrum removal plots ##
+vrplots <- which(grepl("vr", sites)==TRUE)#
+# sites[vrplots]#
+vrplots1 <- which(grepl("veratrum removal", sites)==TRUE)#
+#
+plots <- unique(gothic$filelow)#
+plots[interface] <- "int"  #
+plots[rmplots] <- "rm"  #
+plots[rmplots1] <- "rm"#
+plots[rmplots2] <- "rm"#
+plots[wmplots] <- "wm"  #
+plots[wmplots1] <- "wm"#
+plots[wmplots2] <- "wm"#
+plots[emplots] <- "em"  #
+plots[emplots1] <- "em" #
+plots[gpplots] <- "gp"  #
+plots[gpplots1] <- "gp"#
+plots[vrplots] <- "vr"  #
+plots[vrplots1] <- "vr"#
+#
+numsigns <- c()#
+for (i in 1:length(sites)){#
+numsigns[i] <- substr((strsplit(sites[i], "#")[[1]][2]),1,1) #
+}#
+#
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+inty <- interface[1:75]#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))#
+#
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)#
+#
+# new file is adjusted version of the above, see Gothic_PlotNotes.txt for info ##
+lookupcorr <- read.csv("/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplotcorr.csv", header=TRUE)#
+#
+# final unique plots ##
+uniqueplots <-  sort(unique(paste(lookupcorr$plots, lookupcorr$plotnums, sep=" ")))#
+write.csv(uniqueplots, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/uniqueplots.csv", row.names=FALSE)
+options(stringsAsFactors = FALSE)#
+#
+gothic <- read.csv("/Users/Lizzie/Documents/Professional/NCEAS/Research/Phenology/Data/Gothic/Compiling data/October2010Progress/gothic-testclean/gothic-cleaned.csv", header=TRUE)#
+#
+gothic$filelow <- tolower(gothic$file)#
+sites <- unique(gothic$filelow)#
+#
+## Clean up plots ###
+#
+# interface plots ##
+interface <- which(grepl("int", sites)==TRUE)#
+#sites[interface]#
+# rocky meadow plots (incl. aspen forest) ##
+rmplots <- which(grepl("rm", sites)==TRUE)#
+# sites[rmplots]#
+rmplots1 <- which(grepl("rocky meadow", sites)==TRUE)#
+rmplots2 <- which(grepl("aspen forest", sites)==TRUE)#
+# wet meadow plots ##
+wmplots <- which(grepl("wm", sites)==TRUE)#
+# sites[wmplots]#
+wmplots1 <- which(grepl("wet meadow", sites)==TRUE)#
+wmplots2 <- which(grepl("w-m", sites)==TRUE)#
+# erythronium meadow plots ##
+emplots <- which(grepl("em", sites)==TRUE)#
+# sites[emplots]#
+emplots <- emplots[1:40]#
+emplots1 <- which(grepl("erythronium meadow", sites)==TRUE)#
+# greenhouse plots ##
+gpplots <- which(grepl("gp", sites)==TRUE)#
+# sites[gpplots]#
+gpplots1 <- which(grepl("greenhouse", sites)==TRUE)#
+# veratrum removal plots ##
+vrplots <- which(grepl("vr", sites)==TRUE)#
+# sites[vrplots]#
+vrplots1 <- which(grepl("veratrum removal", sites)==TRUE)#
+#
+plots <- unique(gothic$filelow)#
+plots[interface] <- "int"  #
+plots[rmplots] <- "rm"  #
+plots[rmplots1] <- "rm"#
+plots[rmplots2] <- "rm"#
+plots[wmplots] <- "wm"  #
+plots[wmplots1] <- "wm"#
+plots[wmplots2] <- "wm"#
+plots[emplots] <- "em"  #
+plots[emplots1] <- "em" #
+plots[gpplots] <- "gp"  #
+plots[gpplots1] <- "gp"#
+plots[vrplots] <- "vr"  #
+plots[vrplots1] <- "vr"#
+#
+numsigns <- c()#
+for (i in 1:length(sites)){#
+numsigns[i] <- substr((strsplit(sites[i], "#")[[1]][2]),1,1) #
+}#
+#
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+inty <- interface[1:75]#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))#
+#
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)#
+#
+# new file is adjusted version of the above, see Gothic_PlotNotes.txt for info ##
+lookupcorr <- read.csv("/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplotcorr.csv", header=TRUE)#
+#
+# final unique plots ##
+uniqueplots <-  sort(unique(paste(lookupcorr$plots, lookupcorr$plotnums, sep=" ")))#
+write.csv(uniqueplots, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/uniqueplots.csv", row.names=FALSE)
+interface <- which(grepl("int", sites)==TRUE)
+tail(interface)
+try <- plots[interface]
+head(try)
+tail(try)
+sites[interface]
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+inty <- interface[1:75] # changed interface[1:75] to interface since that was what removed willow-meadown plots from being labeled as interface #
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))#
+#
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+# inty <- interface[1:75] # commented out this line and change next line inty->interface, since this was what removed willow-meadown plots from being labeled as interface #
+plotnums[interface] <- substr(sites[interface], 4,4)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))#
+#
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)
+options(stringsAsFactors = FALSE)#
+#
+gothic <- read.csv("/Users/Lizzie/Documents/Professional/NCEAS/Research/Phenology/Data/Gothic/Compiling data/October2010Progress/gothic-testclean/gothic-cleaned.csv", header=TRUE)#
+#
+gothic$filelow <- tolower(gothic$file)#
+sites <- unique(gothic$filelow)#
+#
+## Clean up plots ###
+#
+# interface plots ##
+interface <- which(grepl("int", sites)==TRUE)#
+#sites[interface]#
+# rocky meadow plots (incl. aspen forest) ##
+rmplots <- which(grepl("rm", sites)==TRUE)#
+# sites[rmplots]#
+rmplots1 <- which(grepl("rocky meadow", sites)==TRUE)#
+rmplots2 <- which(grepl("aspen forest", sites)==TRUE)#
+# wet meadow plots ##
+wmplots <- which(grepl("wm", sites)==TRUE)#
+# sites[wmplots]#
+wmplots1 <- which(grepl("wet meadow", sites)==TRUE)#
+wmplots2 <- which(grepl("w-m", sites)==TRUE)#
+# erythronium meadow plots ##
+emplots <- which(grepl("em", sites)==TRUE)#
+# sites[emplots]#
+emplots <- emplots[1:40]#
+emplots1 <- which(grepl("erythronium meadow", sites)==TRUE)#
+# greenhouse plots ##
+gpplots <- which(grepl("gp", sites)==TRUE)#
+# sites[gpplots]#
+gpplots1 <- which(grepl("greenhouse", sites)==TRUE)#
+# veratrum removal plots ##
+vrplots <- which(grepl("vr", sites)==TRUE)#
+# sites[vrplots]#
+vrplots1 <- which(grepl("veratrum removal", sites)==TRUE)#
+#
+plots <- unique(gothic$filelow)#
+plots[interface] <- "int"  #
+plots[rmplots] <- "rm"  #
+plots[rmplots1] <- "rm"#
+plots[rmplots2] <- "rm"#
+plots[wmplots] <- "wm"  #
+plots[wmplots1] <- "wm"#
+plots[wmplots2] <- "wm"#
+plots[emplots] <- "em"  #
+plots[emplots1] <- "em" #
+plots[gpplots] <- "gp"  #
+plots[gpplots1] <- "gp"#
+plots[vrplots] <- "vr"  #
+plots[vrplots1] <- "vr"#
+#
+numsigns <- c()#
+for (i in 1:length(sites)){#
+numsigns[i] <- substr((strsplit(sites[i], "#")[[1]][2]),1,1) #
+}#
+#
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+# inty <- interface[1:75] # commented out this line and change next line inty->interface, since this was what removed willow-meadown plots from being labeled as interface #
+plotnums[interface] <- substr(sites[interface], 4,4)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))#
+#
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)
+substr(sites[interface], 4,4)
+interface
+sites[interface]
+willowmeadowinty <- interface[76:145]
+substr(sites[willowmeadowinty], 16,18)
+substr(sites[willowmeadowinty], 22,24)
+substr(sites[willowmeadowinty], 30,32)
+substr(sites[willowmeadowinty], 28,30)
+substr(sites[willowmeadowinty], 26,30)
+willowmeadowinty1 <- interface[76:125] #
+willowmeadowinty2 <- interface[126:145]#
+#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[willowmeadowinty1] <- substr(sites[willowmeadowinty1], 26,27)#
+plotnums[willowmeadowinty2] <- substr(sites[willowmeadowinty2], 31,32)
+inty <- interface[1:75]
+willowmeadowinty1 <- interface[76:125] #
+willowmeadowinty2 <- interface[126:145]#
+#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[willowmeadowinty1] <- substr(sites[willowmeadowinty1], 26,27)#
+plotnums[willowmeadowinty2] <- substr(sites[willowmeadowinty2], 31,32)
+substr(sites[willowmeadowinty1], 26,27)
+substr(sites[willowmeadowinty2], 31,32)
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+inty <- interface[1:75]#
+willowmeadowinty1 <- interface[76:125] #
+willowmeadowinty2 <- interface[126:145]#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[willowmeadowinty1] <- substr(sites[willowmeadowinty1], 26,27)#
+plotnums[willowmeadowinty2] <- substr(sites[willowmeadowinty2], 31,32)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)
+plots
+unique(gothic$filelow)
+unique(gothic$filelow)[interface]
+numsigns <- c()#
+for (i in 1:length(sites)){#
+numsigns[i] <- substr((strsplit(sites[i], "#")[[1]][2]),1,1) #
+}
+numsigns
+numsigns <- c()#
+for (i in 1:length(sites)){#
+numsigns[i] <- substr((strsplit(sites[i], "#")[[1]][2]),1,1) #
+}#
+#
+# changes below!#
+# willowmeadowinty1 <- interface[76:125] #
+# willowmeadowinty2 <- interface[126:145]#
+# plotnums[willowmeadowinty1] <- substr(sites[willowmeadowinty1], 26,27)#
+# plotnums[willowmeadowinty2] <- substr(sites[willowmeadowinty2], 31,32)#
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+inty <- interface[1:75]#
+#willowmeadowinty1 <- interface[76:125] #
+#willowmeadowinty2 <- interface[126:145]#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+#plotnums[willowmeadowinty1] <- substr(sites[willowmeadowinty1], 26,27)#
+#plotnums[willowmeadowinty2] <- substr(sites[willowmeadowinty2], 31,32)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))
+newplotnames
+unique(gothic$filelow)[wmplots2]
+unique(gothic$filelow)[wmplots]
+unique(gothic$filelow)[wmplots1]
+wmplots2 <- which(grepl("w-m", sites)==TRUE)
+sites[wmplots2]
+wmplots2 <- which(grepl("w-m"\\d, sites)==TRUE)
+wmplots2 <- which(grepl("w-m\\d", sites)==TRUE)
+sites[wmplots2]
+options(stringsAsFactors = FALSE)#
+#
+gothic <- read.csv("/Users/Lizzie/Documents/Professional/NCEAS/Research/Phenology/Data/Gothic/Compiling data/October2010Progress/gothic-testclean/gothic-cleaned.csv", header=TRUE)#
+#
+gothic$filelow <- tolower(gothic$file)#
+sites <- unique(gothic$filelow)#
+#
+## Clean up plots ###
+#
+# interface plots ##
+interface <- which(grepl("int", sites)==TRUE)#
+#sites[interface]#
+# rocky meadow plots (incl. aspen forest) ##
+rmplots <- which(grepl("rm", sites)==TRUE)#
+# sites[rmplots]#
+rmplots1 <- which(grepl("rocky meadow", sites)==TRUE)#
+rmplots2 <- which(grepl("aspen forest", sites)==TRUE)#
+# wet meadow plots ##
+wmplots <- which(grepl("wm", sites)==TRUE)#
+# sites[wmplots]#
+wmplots1 <- which(grepl("wet meadow", sites)==TRUE)#
+wmplots2 <- which(grepl("w-m\\d", sites)==TRUE) # key fix to not label willow-meadow as wm!#
+# erythronium meadow plots ##
+emplots <- which(grepl("em", sites)==TRUE)#
+# sites[emplots]#
+emplots <- emplots[1:40]#
+emplots1 <- which(grepl("erythronium meadow", sites)==TRUE)#
+# greenhouse plots ##
+gpplots <- which(grepl("gp", sites)==TRUE)#
+# sites[gpplots]#
+gpplots1 <- which(grepl("greenhouse", sites)==TRUE)#
+# veratrum removal plots ##
+vrplots <- which(grepl("vr", sites)==TRUE)#
+# sites[vrplots]#
+vrplots1 <- which(grepl("veratrum removal", sites)==TRUE)#
+#
+plots <- unique(gothic$filelow)#
+plots[interface] <- "int"  #
+plots[rmplots] <- "rm"  #
+plots[rmplots1] <- "rm"#
+plots[rmplots2] <- "rm"#
+plots[wmplots] <- "wm"  #
+plots[wmplots1] <- "wm"#
+plots[wmplots2] <- "wm"#
+plots[emplots] <- "em"  #
+plots[emplots1] <- "em" #
+plots[gpplots] <- "gp"  #
+plots[gpplots1] <- "gp"#
+plots[vrplots] <- "vr"  #
+plots[vrplots1] <- "vr"#
+#
+numsigns <- c()#
+for (i in 1:length(sites)){#
+numsigns[i] <- substr((strsplit(sites[i], "#")[[1]][2]),1,1) #
+}#
+#
+plotnums <- unique(gothic$filelow)#
+plotnums[(which(is.na(numsigns)==FALSE))] <-#
+    numsigns[(which(is.na(numsigns)==FALSE))]#
+inty <- interface[1:75]#
+plotnums[inty] <- substr(sites[inty], 4,4)#
+plotnums[rmplots] <- substr(sites[rmplots], 3,3)#
+plotnums[wmplots] <- substr(sites[wmplots], 3,3)#
+plotnums[emplots] <- substr(sites[emplots], 3,3)#
+plotnums[gpplots] <- substr(sites[gpplots], 3,3)#
+plotnums[vrplots] <- substr(sites[vrplots], 3,3)#
+wmplotsy <- wmplots2[1:30]#
+plotnums[wmplotsy] <- substr(sites[wmplotsy], 4,4)#
+#
+newplotnames <- as.data.frame(cbind(sites, plots, plotnums))#
+#
+# write these extractions out ##
+write.csv(newplotnames, "/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplot.csv", row.names=FALSE)#
+#
+# new file is adjusted version of the above, see Gothic_PlotNotes.txt for info ##
+lookupcorr <- read.csv("/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplotcorr.csv", header=TRUE)
+### Started 14 March 2011 ####
+### By Lizzie and Master Regetz ####
+#
+### Cleaning up Gothic, Act III ####
+### This follows gothiccleanplots -- which just does plots ####
+### This integrates plot changes and clean spp. then integrates cleaned names #####
+#
+options(stringsAsFactors = FALSE)#
+#
+setwd("/Users/Lizzie/Documents/Subversion/phenology/gothic/species")#
+#
+# define helper function to replace all occurrences of#
+# consecutive spaces with a single space, and remove trailing spaces#
+fix.spaces <- function(x) {#
+    x <- gsub(" +", " ", x)#
+    sub(" +$", "", x)#
+}#
+#
+# Jim, where is the test-clean on svn? ##
+## get the gothic data ###
+gothic <- read.csv("/Users/Lizzie/Documents/Professional/NCEAS/Research/Phenology/Data/Gothic/Compiling data/October2010Progress/gothic-testclean/gothic-cleaned.csv", header=TRUE)#
+# put the new plot info in, will need it later #
+gothic$filelow <- tolower(gothic$file)#
+lookupcorr <- read.csv("/Users/Lizzie/Documents/Subversion/phenology/gothic/plots/lookupplotcorr.csv", header=TRUE)#
+gothic <- merge(gothic, lookupcorr, by.x="filelow", by.y="sites", all.x=TRUE)#
+gothic$plotNums <- paste(gothic$plots, gothic$plotnums, sep="-")#
+#
+## Cleaning rounds ###
+# first round of cleaning by G. Aldridge ##
+cleanga <- read.csv("GAcleaned/cleansppsbyhandga.csv",header=TRUE)#
+# second round of cleaning by G. Aldridge ##
+cleanga2 <- read.csv("GAcleaned/cleansppsr2rga.csv",header=TRUE)#
+# third round of cleaning by G. Aldridge ##
+cleanga3 <- read.csv("GAcleaned/cleansppsr3rga.csv",header=TRUE)#
+# fourth round of cleaning by G. Aldridge ##
+cleanga4 <- read.csv("GAcleaned/cleansppsr4rga.csv",header=TRUE)#
+# last round of cleaning by G. Aldridge ##
+# appears as 6 since round 5 was plot-based ##
+cleanga6p1 <- read.csv("GAcleaned/cleansppsr6rga.csv",header=TRUE)#
+cleanga6p2 <- read.csv("GAcleaned/cleanednamesga.csv",header=TRUE)#
+cleanga6p2use <- subset(cleanga6p2, needs.change=="yes")#
+cleanga6 <- rbind(cleanga6p1, cleanga6p2use)#
+# cleaning by David Inouye (DI - file used here was created by Lizzie using#
+# cleanednamesDI.csv, 9 June 2011 version) ##
+# note that I changed this file some after comments from DI rec'd 3 and 6.Feb.2013 in cleaned_DIchanges3.csv and GothicInouye_phenspecies2.csv (see notes column)#
+cleandi <- read.csv("DIcleaned/cleaned_DIchanges.csv",header=TRUE)#
+#
+## Create one look-up table for cleaned names ###
+names(cleanga2)[names(cleanga2)=="need.change"] <- "needs.change"#
+names(cleanga2)[names(cleanga2)=="new.genus"] <- "lookup.gen"#
+names(cleanga2)[names(cleanga2)=="new.epithet"] <- "lookup.sp"#
+names(cleanga2)[names(cleanga2)=="species"] <- "givenname"#
+names(cleanga3)[names(cleanga3)=="new.genus"] <- "lookup.gen"#
+names(cleanga3)[names(cleanga3)=="new.epithet"] <- "lookup.sp"#
+names(cleanga3)[names(cleanga3)=="species"] <- "givenname"#
+names(cleanga6)[names(cleanga6)=="lookup.genus"] <- "lookup.gen"#
+names(cleanga6)[names(cleanga6)=="lookup.epithet"] <- "lookup.sp"#
+names(cleandi)[names(cleandi)=="lookup.genus"] <- "lookup.gen"#
+names(cleandi)[names(cleandi)=="lookup.epithet"] <- "lookup.sp"#
+#
+cleanga3$needs.change <- "yes"#
+cleanga3$notes <- NA#
+cleanga6$notes <- NA#
+#
+cleangarbind <- subset(cleanga, needs.change=="no" | lookup.gen!="") #
+cleanga2rbind <- subset(cleanga2, needs.change=="no" |lookup.gen!="") #
+cleanga3rbind <- subset(cleanga3, lookup.gen!="")#
+cleanga4rbind <- subset(cleanga4, needs.change=="no" |lookup.gen!="")#
+cleanga6rbind <- subset(cleanga6, needs.change=="no" |lookup.gen!="")#
+#
+cleangarbind <- subset(cleangarbind, select=c("givenname", "needs.change", #
+    "lookup.gen", "lookup.sp", "notes"))#
+cleanga2rbind <- subset(cleanga2rbind, select=c("givenname", "needs.change",#
+   "lookup.gen", "lookup.sp", "notes"))#
+cleanga3rbind <- subset(cleanga3rbind, select=c("givenname", "needs.change",#
+   "lookup.gen", "lookup.sp", "notes"))#
+cleanga4rbind <- subset(cleanga4rbind, select=c("givenname", "needs.change",#
+   "lookup.gen", "lookup.sp", "notes"))#
+#
+cleanedbyGA <- rbind(cleangarbind, cleanga2rbind, cleanga3rbind,#
+    cleanga4rbind, cleanga6rbind)#
+# cleanedbyGA <- subset(cleanedbyGA, lookup.gen!="")#
+## fix some issues#
+# initially I tried to update each specifically so that spp that did not#
+# need changes were noted as such, then I just made the corrections#
+# Thus some species were changed even when they were right to start with, which seems fine.#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="columbinaum")] <- "columbianum"#
+cleanedbyGA$needs.change[which(cleanedbyGA$givenname=="Aquilegia coerulea")] <- "no"#
+cleanedbyGA$lookup.gen[which(cleanedbyGA$givenname=="Aquilegia coerulea")] <- ""#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$givenname=="Aquilegia coerulea")] <- ""#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="engelmanii")] <- "engelmannii"#
+cleanedbyGA$needs.change[which(cleanedbyGA$givenname=="Castilleja linariaefolia")] <- "no"#
+cleanedbyGA$lookup.gen[which(cleanedbyGA$givenname=="Castilleja linariaefolia")] <- ""#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$givenname=="Castilleja linariaefolia")] <- ""#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="linariifolia")] <- "linariaefolia"#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="nuttallianium")] <- "nuttallianum"#
+cleanedbyGA$lookup.gen[which(cleanedbyGA$lookup.gen=="Descurainia")] <- "Descurainea"#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="trachycaulus")] <- "trachycaulis"#
+cleanedbyGA$lookup.gen[which(cleanedbyGA$lookup.gen=="Koeleria")] <- "Koelaria"#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="stellata")] <- "stellatum"#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$lookup.sp=="integerimus")] <- "integerrimus"#
+cleanedbyGA$needs.change[which(cleanedbyGA$givenname=="Koeleria macrantha")] <- "yes"#
+cleanedbyGA$lookup.gen[which(cleanedbyGA$givenname=="Koeleria macrantha")] <- "Koelaria"#
+cleanedbyGA$lookup.sp[which(cleanedbyGA$givenname=="Koeleria macrantha")] <- "macrantha"#
+#
+subset(cleanedbyGA, duplicated(cleanedbyGA$givenname) & needs.change=="yes")#
+cleanedbyGA$givenname <- fix.spaces(cleanedbyGA$givenname)#
+# cleanedbyGA <- cleanedbyGA[!duplicated(cleanedbyGA$givenname),]#
+# most are duplicate nos, but not all, see above.#
+# for these we preferntially keep those with new names over needs.change=='no'#
+cleanedbyGA <- cleanedbyGA[order(cleanedbyGA$needs.change, decreasing=TRUE, na.last=TRUE) , ]#
+cleanedbyGA <- cleanedbyGA[!duplicated(cleanedbyGA$givenname),]#
+cleanedspp <- cleanedbyGA#
+write.csv(cleanedspp, "cleanedspp.csv", row.names=FALSE)#
+#
+## Now start integrating cleaned names ###
+# integrate cleaned names that must be plot-based#
+# aka the grasses#
+cleangrassga <- read.csv("GAcleaned/gothicunkngrassga.csv",header=TRUE)#
+cleangrass <- subset(cleangrassga, new.genus!="" & new.epithet!="",#
+    select=c("species", "new.genus", "new.epithet", "plotNums"))#
+cleangrass <- unique(cleangrass)#
+if (any(duplicated(cleangrass[c("species", "plotNums")]))) {#
+    stop("duplicated merge columns in cleangrass")#
+}#
+gothic1 <- merge(gothic, cleangrass, by=c("species", "plotNums"),#
+    all.x=TRUE, sort=FALSE)#
+#
+# replaces species with new names, get which rows changed#
+gothic1$species <- ifelse(is.na(gothic1$new.genus)==FALSE,#
+    paste(gothic1$new.genus, gothic1$new.epithet), gothic1$species)#
+grassfill <- which(is.na(gothic1$new.genus)==FALSE) #
+#
+# get rid of unwanted columns #
+gothic1 <- subset(gothic1, select=-c(new.genus, new.epithet))#
+gothic1$species <- fix.spaces(gothic1$species)#
+#
+##
+# integrate other cleaned names back into gothic data#
+##
+#
+# merged gothic and cleanedspp based on the original name#
+gothic2 <- merge(gothic1, cleanedspp, by.x="species", by.y="givenname",#
+    all.x=TRUE, sort=FALSE)#
+#
+# transform needs.change into was.changed, replacing NAs with "tbd"#
+names(gothic2)[names(gothic2)=="needs.change"] <- "was.changed"#
+#
+# for those that were cleaned, replace original names with cleaned names#
+gothic2$was.changed[is.na(gothic2$was.changed)] <- "tbd"#
+gothic2$species <- ifelse(gothic2$was.changed=="yes",#
+    paste(gothic2$lookup.gen, gothic2$lookup.sp), gothic2$species)#
+gothic2$species <- fix.spaces(gothic2$species)#
+#
+# incorporate additional lookup.gen/lookup.sp corrections from DI#
+# ...first clean white space in DI lookup.gen column#
+cleandi$lookup.gen <- fix.spaces(cleandi$lookup.gen)#
+# ...identify which gothic2 rows correspond to DI corrections#
+needsCleanDI <- gothic2$species %in% cleandi$givenname#
+# ...update the lookup.gen and lookup.sp columns accordingly#
+gothic2$lookup.gen[needsCleanDI] <-#
+    cleandi$lookup.gen[match(gothic2$species[needsCleanDI],#
+    cleandi$givenname)]#
+gothic2$lookup.sp[needsCleanDI] <-#
+    cleandi$lookup.sp[match(gothic2$species[needsCleanDI],#
+    cleandi$givenname)]#
+# ...flag these records as having been changed#
+gothic2$was.changed[needsCleanDI] <- "yes"#
+# ...and generate updated binomials#
+gothic2$species[needsCleanDI] <- paste(gothic2$lookup.gen[needsCleanDI],#
+    gothic2$lookup.sp[needsCleanDI])#
+#
+# add in plot-based cleaning above#
+# note unkn grasses#
+# change the bromes first, in case the word 'grass' ever co-occurs with brome/bromus#
+# okay, so I admit at this point we end up with none of this doing anything#
+# cleanedspp seems to cleans these all out, but I am leaving them for safe-keeping#
+unknbrome1 <- which(grepl("brome", gothic2$species)==TRUE)#
+unknbrome2 <- which(grepl("Brome", gothic2$species)==TRUE)#
+unknbrome3 <- which(grepl("Bromus", gothic2$species)==TRUE)#
+gothic2$species[unknbrome1] <- "Bromus sp."#
+gothic2$species[unknbrome2] <- "Bromus sp."#
+gothic2$species[unknbrome3] <- "Bromus sp."#
+#
+unkngrasses <- which(grepl("grass", gothic2$species)==TRUE)#
+unknGrasses <- which(grepl("Grass", gothic2$species)==TRUE)#
+gothic2$species[unkngrasses] <- "unkngrass"#
+gothic2$species[unknGrasses] <- "unkngrass"#
+#
+# note changes in was.changed#
+gothic2$was.changed[grassfill] <- "yes"#
+gothic2$was.changed[unkngrasses] <- "yes"#
+gothic2$was.changed[unknGrasses] <- "yes"#
+gothic2$was.changed[unknbrome1] <- "yes"#
+gothic2$was.changed[unknbrome2] <- "yes"#
+gothic2$was.changed[unknbrome3] <- "yes"#
+#
+# Note that Stipa lettermanii (one n) and Muhlenbergia montana#
+# (the only two never noted as not needing cleaning and not cleaned)#
+# are, according to a 13.Apr.2011 email from G. Aldridge a-okay ##
+# So, as of August 2013, updating them from was.changed "tbd" to "no"#
+gothic2$was.changed[gothic2$species=="Stipa lettermanii"] <- "no"#
+gothic2$was.changed[gothic2$species=="Muhlenbergia montana"] <- "no"#
+#
+# get rid of unwanted columns, don't leave leave 'notes'#
+# we can provide cleanedspp with them in it, for those who need it) ##
+gothic2 <- subset(gothic2, select=-c(lookup.gen, lookup.sp))#
+#
+# what's left?#
+stillunkn <- subset(gothic2, was.changed=="tbd") # nothing!#
+#
+# delete the species named Delete and Total Flowers#
+# okayed by Amy McKinney in email 20.Sep.2012#
+gothicfixed <- subset(gothic2, species!="Delete")#
+gothicfixed <- subset(gothicfixed, species!="Total Flowers")#
+#
+knowns <- as.data.frame(sort(unique(gothicfixed$species)))#
+# allspp <- as.data.frame(sort(unique(gothic2$species)))#
+#
+write.csv(knowns, "cleanednames.csv", row.names=FALSE)#
+write.csv(gothic2, "gothicclean.csv", row.names=FALSE)#
+####
+### See gothicclean_choppedCode.R for code that used to be here #
+### (as of 7.Mar.12, EMW cut it)
+head(gothic2)
+try <- subset(gothic2, plots=="mi")
+head(try)
+tail(try)
+interface <- which(grepl("willow-mead", gothic2$filelow)==TRUE)
+try <- gothic2[interface,]
+head(try)
+tail(try)
+lup <- subset(gothic2, date=="2009-07-03")
+head(lup)
+luplup <- subset(lup, species=="Lupinus sp,")
+luplup
+luplup <- subset(lup, species=="Lupinus sp.")
+luplup
+lup <- subset(gothic2, date=="2009-07-03")
+luplup <- subset(lup, species=="Lupinus sp.")
+luplup
+gothic2 <- read.csv("~/Documents/Subversion/phenology/gothic/species/gothicclean.csv", header=TRUE)
+lup <- subset(gothic2, date=="2009-07-03")
+luplup <- subset(lup, species=="Lupinus sp.")
+luplup

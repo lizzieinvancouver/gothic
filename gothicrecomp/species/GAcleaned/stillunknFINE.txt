@@ -1,0 +1,31 @@
+From: George Aldridge <george.aldridge@gmail.com>
+Date: April 13, 2011 4:55:14 PM GMT+02:00
+To: "Wolkovich, Elizabeth" <ewolkovich@ucsd.edu>
+Subject: Re: Clean code!
+
+Hi Lizzie;
+
+Stipa lettermanii looks fine -- is there a Stipa lettermannii (2 n's)? If so, that should be changed to lettermanii (1 n).
+
+Muhlenbergia montana also looks fine.
+
+-George
+
+On Tue, Apr 12, 2011 at 11:42 AM, Elizabeth M Wolkovich <ewolkovich@ucsd.edu> wrote:
+ Finally, the Gothic species cleaning code is approaching perfection. It spit out two names that either need to be cleaned or I need to note that they don't need to be cleaned. Let me know (attached) and I'll just write corrections directly into the code.
+
+'Best,
+Lizzie
+
+-- 
+------------------------------
+Elizabeth M Wolkovich
+NSF Postdoctoral Fellow in Biology-Bioinformatics
+University of California - San Diego
+9500 Gilman Drive #0116
+La Jolla, CA 92103-0116
+Phone: 858.246.0509
+email: ewolkovich@ucsd.edu
+http://www.biology.ucsd.edu/~ewolkovi
+
+

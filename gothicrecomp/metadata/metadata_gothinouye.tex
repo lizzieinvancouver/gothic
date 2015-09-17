@@ -1,0 +1,368 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=1.00in, bottom=1.0in, left=1.1in, right=1.1in]{geometry}
+\renewcommand{\baselinestretch}{1.1}
+\usepackage{graphicx}
+\usepackage{natbib}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[LO]{Gothic Inouye flowering data}
+\fancyhead[RO]{prepared by Wolkovich from 2013-2015}
+
+\setlength\parindent{0pt} % no indents throughout
+
+\begin{document}
+%% Note: I started this document in October 2013, three years after we started this project. It's based on what's in my head now as well as going through all the folders on my computer related to this project including:
+%% main bits:
+% in Subversion/phenology/notposting/gothicextras
+% in Subversion/phenology/gothic
+% in NCEAS/Phenology/Data/Gothic/Compiling data
+%% extraneous bits of info in:
+% in NCEAS/Phenology/Data/Gothic/emails
+% in NCEAS/Phenology/Data/Gothic/2010 Jun new data format
+% in NCEAS/Phenology/Data/Gothic/Acknowledgments
+% **So, while I may keep those above folders, please consider this a braindrain of them all. Unless absolutely necessary my plan is for this to contain all useful knowledge and those other files to just be something I should let go of.**
+
+%% I went through these folders so far (15 Aug 2014):
+% NCEAS/Phenology/Data/Gothic/emails (definitely has some emails about compiling data in it)
+% in NCEAS/Phenology/Data/Gothic/2010 Jun new data format
+% in NCEAS/Phenology/Data/Gothic/Acknowledgments
+% and in NCEAS/Phenology/Data/Gothic/Compiling data I did everything but the last folder.
+% Also went through SVN log
+% I went through the SVN folders in 'notposting'
+% I went through all the 'gothic:' tasks in redmine, save for 132
+% (about species names)
+
+% August 2015: I found some species I expect do not seem to show in
+% the gothicclean data: such as Aster engelmannii -- this does not
+% show in up cleanedspp.csv but -- after much work I figured out that
+% it is part of a last sweep of cleaning (see line of code '#
+% incorporate additional lookup.gen/lookup.sp corrections from DI ')
+% and there it changes to Eucephalus engelmannii, type cleandi around
+% that point in the code and you can see these additional changes ...
+
+% Include in metadata:
+% ZIP STUFF! %
+% - dump of whole subversion folder called 'gothic'
+% - Gothic_PlotNotes in svn, gothic/plots (I would include this and
+% not the CSV files the R code calls)
+% gothic-testclean, which is here:
+% /Users/Lizzie/Documents/Professional/NCEAS/Research/Phenology/Data/Gothic/Compiling data/October2010Progress/gothic-testclean and is the file used from the plots onward 
+
+\title {Metadata for compilation of David Inouye's Gothic \protect\\ (Colorado, USA) long-term flowering data}
+\author{Compiled by E. M. Wolkovich and J. Regetz, \protect\\ with help
+  from David Inouye, Amy Iler and Jane Ogilvie}
+\date{17 September 2015}
+\maketitle
+\tableofcontents
+
+\newpage
+\section{Basics}
+We started this project in 2010 because the original compilation by Jessica Forest did not include the following:
+\begin{itemize}
+\item Greenhouse plots, nor the stream plot
+\item Non-zoophilious species
+\end{itemize}
+So we (Lizzie Wolkovich \& Jim Regetz) went about re-compiling the
+data from the original xls files that were edited by George Aldridge
+(1973-2009) and shared with Wolkovich. Note that at least one version
+of the data does contain these things (above), they may have been
+added in by George Aldridge but, either way, this recompilation
+contains more information than previous versions (more species and more years for some species). 
+
+\section{Overview of re-compiling Excel files}
+The work of compiling these xls files occurs in two parts: a Perl script: \verb|xls2csvJR.pl| and then an R script: \verb|processraw.R|.\\
+
+Data for each species were taken from the xls files. In general, there are two rows for each species name in the original files, with the first row \emph{generally} representing a count of flowers and the second row \emph{generally} representing a count of something else. Often `what was counted' information is given in the last column of each spreadsheet. We extracted these data as follows:
+\begin{enumerate}
+\item If there were \(>\) 2 rows for a species, we excluded the data
+  in the extra rows (usually there was only a third row, here are Regetz's
+  notes from issue 44 in Redmine (project management software to manage the code and record issues):
+\begin{quote} 
+Lizzie talked with George Aldridge Friday (Inouye postdoc) and it truly seems like the third column is either:\\
+- the sum of the first two\\
+- plants that look sorta male and sorta female\\
+- a mystery, really, truly, who knows?\\
+Based on this and that it's impossible to tell a mystery from a s/he plant we agreed strongly that tossing the third row of the data is the way to go.\\
+Yee-haw!
+\end{quote}
+\item If there were only 1 row, we caused an error to report (which we never saw)
+\item If there were exactly two rows (most common case) we:
+\begin{enumerate}
+\item converted all NAs to 0
+\item then converted all non-numeric values to NA
+\item then compared row1 values to row2 values, excluding NAs and:
+\begin{enumerate}
+\item if all \(row1>=row2\), we used row1 as `flower' and row2 as 'other'
+\item else if all \(row2>=row1\), do the reverse
+\item else remove both rows of data.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+Email from Jim from 2012 August plant parts (svn r48): 
+\begin{quote}
+In cases where the same plant part is given for both rows of data, the values from the first row were put into the appropriate column, and the
+values from the second row were put into a separate column called `double.count'. In many cases this apparent duplication happens because
+one row actually represents males and the other row represents females, but we chose not to add the values together because we highly doubted that this was \emph{always} the case (and it would have required throwing all the non-numeric values out, which appeared useful).
+
+Branches, catkins, stalks, and stems were included in `other'. For any cases where the plant part column was empty (NA), the values were put into column `unknown1' if they come from the first
+row for the species, or `unknown2' if they come from the second row
+for the species. (Also, from taslk 127: In cases where no plant part
+column is detected, NA is used instead, which means the two rows of
+data for every species get inserted into the 'unknown1' and 'unknown2'
+columns.)
+\end{quote}
+
+A few more notes:
+\begin{itemize}
+\item J. Forrest noted that there are some missing starts/ends of seasons and some months missing, of which it would be good to be aware.
+\item One datasheet issue: vr11984.xls and vr1-1984.xls appeared
+  identical with the only difference appearing to be that the final
+  column of the second row of the last species, ``Senecio bigelovii'':
+  it contains ``plants'' in the former, but `clumps(genets)' in the
+  latter. We kept the `clumps' one based on advice from G. Aldridge.
+\item All empty cells in the original Excel files are maintained in
+  the main data file (\verb|gothicclean.csv|), see below.
+\end{itemize}
+
+\section{Plots}
+
+There was a lookup table for converting file names to plot names. G. Aldridge approved this. \\
+
+\verb|gothiccleanplots.R| does the work to pre-clean the plots
+I (Lizzie) then ran the output and decisions I made by George Aldridge (Inouye postdoc).\\
+
+Plot naming:
+\begin{itemize}
+\item rm: rocky meadow
+\item gh: greenhouse
+\item vr: veratrum removal
+\item wm: wet meadow
+\item em: erthronium meados
+\item mw: meadow (alone) plots
+\item st: stream plots
+\item mi: interface plots (including willow-meadow interface plots)
+\end{itemize}
+
+Other changes:\\
+numbers 10 and 11 -- to 1 \\
+1973 plots were left unchanged on purpose (first year, naming
+conventions and plots in flux)
+
+Note from Amy Iler on 10 September 2015: There is only one stream plot and one meadow plot (not to be confused with wet meadow plots), which were added in 2004 by David, with the aim of including more species.  These need to be treated with caution when analyzing the data, because they can make it seem like there is a phenological advancement for species that were already present in the data set, when it is partly because these new plots were added.  The greenhouse plots do not seem to have the same effect, probably because they were added earlier (e.g., analysis of change through time in first flowering date with and without the GH plots provides slopes that are correlated by $r = 0.98$). 
+
+% See also: Gothic_PlotNotesWemails.txt (though I have skimmed this and think we have all the relevant info here).
+
+\section{Species name cleaning}
+
+\verb|gothiccleansp.R| does the work to clean species names, a major
+undertaking by George Aldridge, David Inouye and Lizzie. \\
+
+To clean the species names I (Lizzie) sent out the species list from the processed
+Excel files to George (and, towards the end, David) who then said which
+names were okay or not. I then added in all the changes and sent the
+new list out. Repeat. We repeated this process 6+ times (I think
+sometimes switching things back). I tried to coordinate all final
+information about these changes:
+
+\begin{itemize}
+\item \verb|GothicInouye_phenspecies.csv|, should be
+a list of all species in the cleaned final file and relevant
+information, together: 
+\item \verb|cleanedspp.csv| and \verb|cleaned_DIchanges.csv| \emph{should,
+  as best Lizzie can remember} contain a synposis of all species names
+and changes.
+\end{itemize}
+
+A couple more random notes:
+\begin{itemize}
+\item We treated all spp. as sp. based on email from G. Aldridge (dated 6.Apr.2011)
+\item From G. Aldridge 2010 March, ``In the case of Valeriana, I
+  believe flowers were never counted because they're so small, but
+  there might be years where some enterprising soul did count
+  them. There might also be times when the stalk counts for Valeriana
+  are in row 1. I guess the way to know is if the numbers are really
+  big or fairly small.''
+\item At least two \emph{Lupinus} species exist within the
+  \emph{Lupinus sp.} in the data. They generally have different
+  phenologies. Ask Amy Iler, David Inouye or Jane Ogilvie for more information.
+\end{itemize}
+
+\section{What's in the main data file?}
+
+The main data file is \verb|gothicclean.csv| (currently in the species
+folder) -- this is the final file
+after the merging and cleaning of Excel files, the cleaning of all the
+plot names and species names. \\
+
+See also: \emph{Overview of re-compiling Excel
+files} above, which has many more details of what `other'
+etc. actually means.\\
+
+This file has 13 columns, here is Lizzie's 2015 understanding of them:
+\begin{enumerate}
+\item \verb|species| -- the cleaned species name
+\item \verb|plotNums| -- the cleaned, shortened plot name and numbers
+  (see section in this file on on Plots)
+\item \verb|filelow| -- the original Excel file name in all lowercase
+\item \verb|file| -- the original Excel file name, possibly not in all lowercase
+\item \verb|date| -- the date of observation
+\item \verb|capitula| -- number of capitula counted
+\item \verb|clusters| -- number of clusters counted
+\item \verb|flowers| -- number of flowers counted
+\item \verb|inflorescences| -- number of inflorescences counted
+\item \verb|other| -- number of other counted (includes branches, catkins, stalks, and stems)
+\item \verb|plants| -- number of plants counted      
+\item \verb|unknown1| -- additional information that does not appear
+  to be a capitula, clusters, flowers, inflorescences, other or plants
+  (i.e., plant part column of original xls file was empty)
+  and was from the \emph{first} row of data for the species
+\item \verb|unknown2| -- additional information that does not appear
+  to be a capitula, clusters, flowers, inflorescences, other or plants
+  (i.e., plant part column of original xls file was empty)
+  and was from the \emph{second} row of data for the species
+\item \verb|double.count| -- Double count is in the \verb|processraw.R| file and
+takes every instance where the species and plant part repeats on two
+rows of data and then
+takes
+whatever info there is in the second row and puts in the double-count column. Often this
+is a number, often it is a note such as `tops of 2 stalks eaten' or
+`frozen.')  See also the `email from Jim from August 2012' in \emph{Overview of re-compiling Excel
+files}.
+\item \verb|plots| -- plot in two letter code
+\item \verb|plotnums| -- plot number (no letters) 
+\item \verb|was.changed| -- whether or not the species name was
+  changed in species cleaning
+\item \verb|notes| -- notes from the original file
+\end{enumerate}
+
+\section{What's in the folder `gothicrecomp'?}
+A subset of all the files involved the production of the recompiling
+of the Inouye data, including all the above-mentioned \verb|R| files
+and a \verb|Perl| script (\verb|xls2csvJR.pl|) that did the data cleaning, any csv files
+created or used to clean plot and species names, a few note files
+and:
+
+\verb|gothic-ambigous.csv|: As best I (Lizzie) can tell
+gothic-ambigous.csv is 43 times where the plant part was ambigously
+defined (as in one row it's called flowers and the other
+inflorescences or or there is a question mark after the plant part; or
+both are called inflorescences but have differing numbers -- I looked
+some of these up and the few cases I looked at appear to be when male
+versus female were counted but I cannot say that all work that
+way). These data were included but should be checked if possible. \\
+
+All the original Excel files we compiled from. 
+
+\section{May also want to see}
+\verb|gothic-testclean| is the folder received from Regetz in October
+2010 and is the result of merging all the xls files from the
+\verb|xls2csvJR.pl| and \verb|processraw.R| files. It contains:
+\begin{itemize}
+\item \verb|gothic-cleaned.csv| which Lizzie worked from for the plot
+and species cleaning. It also contains
+\item \verb|gothic.Rout| this file contains lots of notes
+on the processing of the Excel files by Regetz. I (Lizzie) tried to go through
+many of these notes but I did not yet (I don't think) check the two
+cases with duplication mentioned:\\
+* ``Erigeron  flagellaris?'' in rm6-1981.xls\\
+* ``grass - long awns'' in rm31991.xls\\
+If you run \verb|processraw.R| (properly) this file
+should also be automatically re-generated.
+\end{itemize}
+
+\verb|notes_on_compliling.txt| we never did use this but can include it
+and mention it if anyone else wants to. From Redmine: 
+\begin{quote}
+\verb|notes_on_compiling.txt| file from J Forrest about which 'provides some
+information on whether flower or inflorescence data are in row 1 or 2
+in which years "provides some information on whether flower or
+inflorescence data are in row 1 or 2 in which years" to see if we
+ended up generally picking these years, or how they were handled and
+what to do about it.
+\end{quote}
+
+\verb|Metadata file for David Inouye.doc| David Inouye's metadata
+file. \\
+
+\emph{Note:} The `gothic' folder was version controlled through \verb|Subversion| (on
+NCEAS' server, until 2015 when Lizzie stopped using \verb|Subversion|) so there is a long log of files detailing when, by who
+and how all files were changed. 
+
+\section{Acknowledgements}
+David Inouye, George Aldridge, Amy Iler, NSF grant DEB 0922080 (ask D. Inouye also), 
+\end{document}
+
+
+
+%%
+%% EXTRAS
+%%
+
+Random emails I had in this file at one point or another:
+
+Oct 2012 from Jim:
+Attached is a zip file with processed Gothic data and a report from R. 
+The CSV is the compilation of *all* the Gothic data sheets, a 50MB 
+uncompressed file containing 800K+ lines of joy.
+
+The associated report will tell you all cases where:
+
+* something that looks like extra species descriptive text (rather than 
+a new species name) was removed:
+https://redmine.nceas.ucsb.edu/nceas/issues/126
+
+E.g. if the report says
+
+  Deleting what looks like common name:
+         “Ceratochloa (Bromus) carinata:    (smooth brome)”
+
+...it means that I deleted "   (smooth brome)" from the row beneath 
+"Ceratochloa (Bromus) carinata". So basically, the text after the colon 
+should always be something that adds more context to the thing before 
+the colon. If the thing after the colon ever looks like a new species 
+name in its own right, that's a problem.
+
+
+* there are >2 apparent (consecutive) lines of data for a species:
+https://redmine.nceas.ucsb.edu/nceas/issues/44
+
+Note that these are _mostly_ Carex, but not always. Sometimes it's just 
+cuz they decided to stick an additional row of data in the sheet, e.g. 
+for Viola adunca in "Aspen Forest Plot #8 - 2006.xls".
+
+At the moment, these are all just being *dropped*. Yee haw. If there is 
+one glaring issue with the whole preprocessing procedure, this is it.
+
+
+* a species name appears appears more than once in the same sheet (in 
+which case it still gets into the output table, but with a .1 is 
+appended to the name of the duplicate):
+https://redmine.nceas.ucsb.edu/nceas/issues/43
+
+As I indicated in the ticket, I want to leave this as-is for now. Feel 
+free to have a look at the 18 (I think) cases - they're all noted in the 
+report.
+
+Enjoy!
+
+%%
+
+From George: 2010 Jun:
+Hi Lizzie;
+
+Just to complicate things...
+
+Here is the Excel file I'm making this year -- is it any better for the tech wonks at NCEAS than the old style? My overall goal is to figure out a way to retain a spreadsheet format that displays a single total number for each species each day, with all of David's additional layers of information embedded within that cell. Here's how it works: the formula in each cell takes 1 of 3 forms:
+1 - the total number of flowers or whatever is being counted;
+1+1 - number of flowers on each of n units of organization (plant, clump, etc...);
+(1+1)+(1+1) - number of flowers on each piece of each () of n units of organization (eg: each ball of flowers on each Hydrophyllum plant).
+
+This way, each cell sums to the number we're really interested in. The challenge is to figure out an automatic way to extract the embedded information into separate .txt files for people (anyone?) who wants frequency distribution data within species. As of now, such embedded information is spotty throughout the data set, and is rarely kept throughout a season. I'd like to work out a standard notation that can be used from now on, and might contribute to this frequency data being consistently collected for whole seasons.
+
+Also, I'd like to put a whole year in one workbook instead of 48 separate files.
+
+Do you still need *all* the excel files FTP'ed to you?
+
+-George
