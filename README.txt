@@ -1,0 +1,1 @@
+This repository contains phenological data from David Inouye’s long-term monitoring in Gothic, CO (USA). Please contact David Inouye at inouye@umd.edu before using any of the data.
